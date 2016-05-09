@@ -164,7 +164,7 @@ func AnalyzeLocalImage(imageName string, minSeverity types.Priority, endpoint, m
 
 	// Setup a simple HTTP server if Clair is not local.
 	if !strings.Contains(endpoint, "127.0.0.1") && !strings.Contains(endpoint, "localhost") {
-		allowedHost = '0.0.0.0/0'
+		allowedHost = "0.0.0.0/0"
 		//portIndex := strings.Index(allowedHost, ":")
 		//if portIndex >= 0 {
 		//	allowedHost = allowedHost[:portIndex]
