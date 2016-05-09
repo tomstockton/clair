@@ -164,16 +164,11 @@ func AnalyzeLocalImage(imageName string, minSeverity types.Priority, endpoint, m
 
 	// Setup a simple HTTP server if Clair is not local.
 	if !strings.Contains(endpoint, "127.0.0.1") && !strings.Contains(endpoint, "localhost") {
-		allowedHost := "0.0.0.0/0"
-		//portIndex := strings.Index(allowedHost, ":")
-		//if portIndex >= 0 {
-		//	allowedHost = allowedHost[:portIndex]
-		//}
 
-		log.Printf("Setting up HTTP server (allowing: %s)\n", allowedHost)
+		log.Printf("Setting up HTTP server (allowing: the world)\n")
 
 		ch := make(chan error)
-		go listenHTTP(tmpPath, allowedHost, ch)
+		go listenHTTP(tmpPath, ch)
 		select {
 		case err := <-ch:
 			return fmt.Errorf("An error occured when starting HTTP server: %s", err)
@@ -362,15 +357,10 @@ func historyFromCommand(imageName string) ([]string, error) {
 	return layers, nil
 }
 
-func listenHTTP(path, allowedHost string, ch chan error) {
-	restrictedFileServer := func(path, allowedHost string) http.Handler {
+func listenHTTP(path, ch chan error) {
+	restrictedFileServer := func(path) http.Handler {
 		fc := func(w http.ResponseWriter, r *http.Request) {
-			host, _, err := net.SplitHostPort(r.RemoteAddr)
-			if err == nil && strings.EqualFold(host, allowedHost) {
-				http.FileServer(http.Dir(path)).ServeHTTP(w, r)
-				return
-			}
-			w.WriteHeader(403)
+			return
 		}
 		return http.HandlerFunc(fc)
 	}
